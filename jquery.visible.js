@@ -7,8 +7,8 @@
      *
      * @author Sam Sehnert
      * @desc A small plugin that checks whether elements are within
-     *       the user visible viewport of a web browser.
-     *       only accounts for vertical position, not horizontal.
+     *       the user visible viewport of a web browser,
+     *       or within the visible area of a containing element.
      */
     var _$w = $(window);
     $.fn.visible = function(partial,hidden,direction,container){
@@ -16,17 +16,17 @@
         if (this.length < 1)
             return;
 
-        var $w        = (container != null ? container : _$w),
-            $t        = this.length > 1 ? this.eq(0) : this,
-            t         = $t.get(0),
-            vpWidth   = $w.width(),
-            vpHeight  = $w.height(),
-            direction = (direction) ? direction : 'both',
+        var $w         = container ? $(container) : _$w,
+            $t         = this.length > 1 ? this.eq(0) : this,
+            t          = $t.get(0),
+            vpWidth    = $w.width(),
+            vpHeight   = $w.height(),
+            direction  = direction ? direction : 'both',
             clientSize = hidden === true ? t.offsetWidth * t.offsetHeight : true;
 
-        if (typeof t.getBoundingClientRect === 'function'){
+        if (!container && typeof t.getBoundingClientRect === 'function'){
 
-            // Use this native browser method, if available.
+            // Use this native browser method if available, if window is our container.
             var rec = t.getBoundingClientRect(),
                 tViz = rec.top    >= 0 && rec.top    <  vpHeight,
                 bViz = rec.bottom >  0 && rec.bottom <= vpHeight,
@@ -41,11 +41,13 @@
                 return clientSize && vVisible;
             else if(direction === 'horizontal')
                 return clientSize && hVisible;
+            
         } else {
 
-            var viewTop         = $w.scrollTop(),
+            var wOffset         = container ? $w.offset() : null,
+                viewTop         = container ? wOffset.top : $w.scrollTop(),
                 viewBottom      = viewTop + vpHeight,
-                viewLeft        = $w.scrollLeft(),
+                viewLeft        = container ? wOffset.left : $w.scrollLeft(),
                 viewRight       = viewLeft + vpWidth,
                 offset          = $t.offset(),
                 _top            = offset.top,
@@ -56,6 +58,8 @@
                 compareBottom   = partial === true ? _top : _bottom,
                 compareLeft     = partial === true ? _right : _left,
                 compareRight    = partial === true ? _left : _right;
+            
+            console.log(viewTop, viewLeft, offset);
 
             if(direction === 'both')
                 return !!clientSize && ((compareBottom <= viewBottom) && (compareTop >= viewTop)) && ((compareRight <= viewRight) && (compareLeft >= viewLeft));
