@@ -58,8 +58,6 @@
                 compareBottom   = partial === true ? _top : _bottom,
                 compareLeft     = partial === true ? _right : _left,
                 compareRight    = partial === true ? _left : _right;
-            
-            console.log(viewTop, viewLeft, offset);
 
             if(direction === 'both')
                 return !!clientSize && ((compareBottom <= viewBottom) && (compareTop >= viewTop)) && ((compareRight <= viewRight) && (compareLeft >= viewLeft));
